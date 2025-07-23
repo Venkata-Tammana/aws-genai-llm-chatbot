@@ -8,8 +8,7 @@ The AWS GenAI LLM Chatbot is a production-ready solution that enables organizati
 
 ## Key Features
 
-- **Multiple LLM Support**: Amazon Bedrock (Claude, Llama 2), SageMaker, and custom model endpoints
-- **Nexus Gateway Integration**: Connect to Nexus Gateway for additional model access
+- **Multiple LLM Support**: Amazon Bedrock (Claude, Llama 2, and other Bedrock models)
 - **Comprehensive RAG Implementation**: Connect to various data sources for context-aware responses
 - **Enterprise Security**: Fine-grained access controls, audit logging, and data encryption
 - **Conversation Memory**: Full conversation history with persistent storage
@@ -51,3 +50,4 @@ For complete documentation, visit the [GitHub repository](https://github.com/aws
 ## License
 
 This project is licensed under the MIT-0 License.
+# ai-fellowship-chatbotmaker
