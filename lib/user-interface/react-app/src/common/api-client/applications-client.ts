@@ -102,4 +102,19 @@ export class ApplicationsClient {
     });
     return result;
   }
+
+  async enhancePrompt(params: { basePrompt: string; model: string }): Promise<string> {
+    const mutation = `
+      mutation EnhancePrompt($input: EnhancePromptInput!) {
+        enhancePrompt(input: $input) {
+          enhancedPrompt
+        }
+      }
+    `;
+    const result = await API.graphql({
+      query: mutation,
+      variables: { input: params },
+    }) as any;
+    return result.data?.enhancePrompt?.enhancedPrompt || "";
+  }
 }

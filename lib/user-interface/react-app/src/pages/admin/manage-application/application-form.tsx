@@ -24,6 +24,7 @@ import { getSelectedModelMetadata } from "../../../components/chatbot/utils";
 import { OptionsHelper } from "../../../common/helpers/options-helper";
 import { useNavigate } from "react-router-dom";
 import { ChabotOutputModality } from "../../../components/chatbot/types";
+import { ApplicationsClient } from '../../../common/api-client/applications-client';
 
 const workspaceDefaultOptions: SelectProps.Option[] = [
   {
@@ -66,6 +67,9 @@ export default function ApplicationForm(props: ApplicationFormProps) {
   const [roles, setRoles] = useState<Role[]>([]);
   const [initialLoad, setInitialLoad] = useState(true);
   const [outputModality, setOutputModality] = useState<ChabotOutputModality>();
+  const [autoEnhance, setAutoEnhance] = useState(false);
+  const [enhancedPrompt, setEnhancedPrompt] = useState("");
+  const [enhancing, setEnhancing] = useState(false);
 
   useEffect(() => {
     if (!appContext?.config) return;
@@ -150,6 +154,30 @@ export default function ApplicationForm(props: ApplicationFormProps) {
 
     fetchApplication();
   }, [appContext, props.data, initialLoad]);
+
+  useEffect(() => {
+    async function fetchEnhancedPrompt() {
+      if (autoEnhance && props.data.systemPrompt && selectedModel) {
+        setEnhancing(true);
+        try {
+          const client = new ApplicationsClient();
+          const modelName = selectedModel.value?.toString() || selectedModel.label;
+          const result = await client.enhancePrompt({
+            basePrompt: props.data.systemPrompt,
+            model: modelName,
+          });
+          setEnhancedPrompt(result);
+        } catch (e) {
+          setEnhancedPrompt("(Failed to enhance prompt)");
+        } finally {
+          setEnhancing(false);
+        }
+      } else {
+        setEnhancedPrompt("");
+      }
+    }
+    fetchEnhancedPrompt();
+  }, [autoEnhance, props.data.systemPrompt, selectedModel]);
 
   const langchainModels = models.filter((m) => m.interface === "langchain");
   const modelsOptions = OptionsHelper.getSelectOptionGroups(langchainModels);
@@ -265,6 +293,26 @@ export default function ApplicationForm(props: ApplicationFormProps) {
                       props.onChange({ systemPrompt: value })
                     }
                   />
+                  <Toggle
+                    checked={autoEnhance}
+                    onChange={({ detail: { checked } }) => setAutoEnhance(checked)}
+                    disabled={!props.data.systemPrompt || !selectedModel}
+                  >
+                    Auto-enhance system prompt
+                  </Toggle>
+                  {autoEnhance && (
+                    <FormField
+                      label="Enhanced Prompt Preview"
+                      description="This is the prompt that will be submitted if auto-enhance is enabled."
+                    >
+                      <Textarea
+                        value={enhancedPrompt}
+                        readOnly
+                        disabled
+                        placeholder={enhancing ? "Enhancing..." : "Enhanced prompt will appear here"}
+                      />
+                    </FormField>
+                  )}
                 </FormField>
 
                 <FormField

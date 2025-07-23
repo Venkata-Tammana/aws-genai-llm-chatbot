@@ -20,6 +20,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ApplicationManageInput } from "../../../common/types";
 import { OptionsHelper } from "../../../common/helpers/options-helper";
 import { Application } from "../../../API";
+import { ApplicationsClient } from '../../../common/api-client/applications-client';
 
 const nameRegex = /^[\w\s+_-]+$/;
 const customPromptRegex = /^[A-Za-z0-9-_., !?]*$/;
@@ -54,6 +55,8 @@ export default function ManageApplication() {
   const [globalError, setGlobalError] = useState<string | undefined>(undefined);
   const [application, setApplication] = useState<Application>();
   const [loading, setLoading] = useState(true);
+  const [autoEnhance, setAutoEnhance] = useState(false);
+  const [enhancedPrompt, setEnhancedPrompt] = useState("");
 
   const getApplication = useCallback(async () => {
     if (!appContext || !applicationId) return;
@@ -201,6 +204,10 @@ export default function ManageApplication() {
     setSubmitting(true);
 
     const selectedModel = OptionsHelper.parseValue(data.selectedModel?.value);
+    let systemPromptToSubmit = data.systemPrompt;
+    if (autoEnhance && enhancedPrompt) {
+      systemPromptToSubmit = enhancedPrompt;
+    }
 
     const newApplicationObj = {
       name: data.name.trim(),
@@ -208,7 +215,7 @@ export default function ManageApplication() {
       workspace: data.selectedWorkspace?.value
         ? OptionsHelper.parseWorkspaceValue(data.selectedWorkspace)
         : "",
-      systemPrompt: data.systemPrompt ?? "",
+      systemPrompt: systemPromptToSubmit ?? "",
       systemPromptRag: data.systemPromptRag ?? "",
       condenseSystemPrompt: data.condenseSystemPrompt ?? "",
       roles: data.selectedRoles.map((x) => x.value ?? ""),

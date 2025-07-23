@@ -17,6 +17,9 @@ from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler.appsync import Router
 from genai_core.auth import UserPermissions
 from decimal import Decimal
+import boto3
+import os
+import json
 
 tracer = Tracer()
 router = Router()
@@ -65,6 +68,11 @@ class UpdateApplicationRequest(BaseModel):
     maxTokens: int = Field(ge=1, le=8192)
     temperature: Decimal = Field(ge=0, le=1)
     topP: Decimal = Field(ge=0, le=1)
+
+
+class EnhancePromptRequest(BaseModel):
+    basePrompt: str = Field(min_length=1, max_length=256, pattern=SAFE_PROMPT_STR_REGEX)
+    model: str = SAFE_SHORT_STR_VALIDATION
 
 
 @router.resolver(field_name="listApplications")
@@ -246,6 +254,40 @@ def update_application(input: dict):
         "createTime": application.get("CreateTime"),
         "updateTime": application.get("UpdateTime"),
     }
+
+
+BEDROCK_MODEL_ID = os.environ.get("BEDROCK_PROMPT_ENHANCER_MODEL_ID", "anthropic.claude-instant-v1")
+
+def call_bedrock_enhancer(base_prompt: str, model: str) -> str:
+    client = boto3.client("bedrock-runtime", region_name=os.environ.get("AWS_REGION", "us-east-1"))
+    system_instruction = (
+        f"You are an expert prompt engineer. "
+        f"Rewrite the following user prompt so it is clear, safe, and optimized for the {model} model. "
+        f"Format it for best results with that model. Only return the improved prompt."
+    )
+    prompt = f"\n\nHuman: {system_instruction}\nUser prompt: {base_prompt}\n\nAssistant:"
+    body = {
+        "prompt": prompt,
+        "max_tokens_to_sample": 256,
+        "temperature": 0.2,
+        "top_p": 0.9,
+        "stop_sequences": ["\n\nHuman:"]
+    }
+    response = client.invoke_model(
+        modelId=BEDROCK_MODEL_ID,
+        body=json.dumps(body),
+        accept="application/json",
+        contentType="application/json"
+    )
+    result = json.loads(response["body"])
+    return result["completion"].strip()
+
+@router.resolver(field_name="enhancePrompt")
+@tracer.capture_method
+def enhance_prompt(input: dict):
+    request = EnhancePromptRequest(**input)
+    enhanced = call_bedrock_enhancer(request.basePrompt, request.model)
+    return {"enhancedPrompt": enhanced}
 
 
 def _create_application(request: CreateApplicationRequest):

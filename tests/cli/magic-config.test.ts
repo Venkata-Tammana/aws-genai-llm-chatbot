@@ -106,34 +106,6 @@ describe("magic-config CLI in non-interactive mode", () => {
     expect(config.rag.engines.aurora.enabled).toBe(false);
   });
 
-  it("should configure Nexus integration when NEXUS_ENABLE is true", async () => {
-    // Set up environment variables for Nexus
-    const env = {
-      ...process.env,
-      SEEDFARMER_DEPLOYMENT: "true",
-      PREFIX: "test-prefix",
-      NEXUS_ENABLE: "true",
-      NEXUS_GATEWAY_URL: "https://test-gateway.example.com",
-      NEXUS_AUTH_CLIENT_ID: "test-client-id",
-      NEXUS_AUTH_CLIENT_SECRET: "test-client-secret",
-      NEXUS_AUTH_TOKEN_URL: "https://test-token.example.com",
-    };
-
-    // Run the CLI in non-interactive mode
-    await execAsync(`node ${CLI_PATH} --non-interactive`, { env });
-
-    // Read and parse the config
-    const configContent = fs.readFileSync(TEST_CONFIG_PATH, "utf-8");
-    const config: SystemConfig = JSON.parse(configContent);
-
-    // Verify Nexus configuration
-    expect(config.nexus?.enabled).toBe(true);
-    expect(config.nexus?.gatewayUrl).toBe("https://test-gateway.example.com");
-    expect(config.nexus?.clientId).toBe("test-client-id");
-    expect(config.nexus?.clientSecret).toBe("test-client-secret");
-    expect(config.nexus?.tokenUrl).toBe("https://test-token.example.com");
-  });
-
   it("should handle boolean environment variables correctly", async () => {
     // Set up environment variables with various boolean formats
     const env = {
@@ -177,10 +149,6 @@ describe("magic-config CLI in non-interactive mode", () => {
       RAG_OPENSEARCH_ENABLE: "true",
       RAG_AURORA_ENABLE: "true",
       RAG_KENDRA_ENABLE: "false",
-      NEXUS_ENABLE: "true",
-      NEXUS_GATEWAY_URL: "https://test-gateway.example.com",
-      NEXUS_AUTH_CLIENT_ID: "test-client-id",
-      NEXUS_AUTH_CLIENT_SECRET: "test-client-secret",
       ADVANCED_MONITORING: "true",
       LOG_RETENTION: "14",
       RATE_LIMIT_PER_IP: "500",
@@ -207,10 +175,6 @@ describe("magic-config CLI in non-interactive mode", () => {
     expect(config.rag.engines.opensearch.enabled).toBe(true);
     expect(config.rag.engines.aurora.enabled).toBe(true);
     expect(config.rag.engines.kendra.enabled).toBe(false);
-
-    // Nexus config
-    expect(config.nexus?.enabled).toBe(true);
-    expect(config.nexus?.gatewayUrl).toBe("https://test-gateway.example.com");
 
     // Advanced settings
     expect(config.advancedMonitoring).toBe(true);

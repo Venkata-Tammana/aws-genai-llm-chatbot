@@ -66,36 +66,6 @@ input:
     defaultValue: false
     label: Enable OpenSearch for RAG
     isRequired: false
-  - name: NEXUS_ENABLE
-    type: Boolean
-    description: Enable Nexus Gateway integration
-    defaultValue: false
-    label: Enable Nexus Gateway
-    isRequired: false
-  - name: NEXUS_GATEWAY_URL
-    type: String
-    description: URL of the Nexus Gateway API
-    defaultValue: ""
-    label: Nexus Gateway URL
-    isRequired: false
-  - name: NEXUS_AUTH_CLIENT_ID
-    type: String
-    description: Client ID for Nexus Gateway authentication
-    defaultValue: ""
-    label: Nexus Auth Client ID
-    isRequired: false
-  - name: NEXUS_AUTH_CLIENT_SECRET
-    type: String
-    description: Client secret for Nexus Gateway authentication
-    defaultValue: ""
-    label: Nexus Auth Client Secret
-    isRequired: false
-  - name: NEXUS_AUTH_TOKEN_URL
-    type: String
-    description: Token URL for Nexus Gateway authentication
-    defaultValue: ""
-    label: Nexus Auth Token URL
-    isRequired: false
 environments:
   - name: DEPLOYMENT
     description: Entire Capability Environment

@@ -1,6 +1,5 @@
 import {
   SupportedRegion,
-  SupportedSageMakerModels,
   SystemConfig,
 } from "../../lib/shared/types";
 
@@ -16,17 +15,8 @@ export function getTestConfig(): SystemConfig {
       enabled: true,
       region: SupportedRegion.US_EAST_1,
     },
-    nexus: {
-      enabled: false,
-      gatewayUrl: "https://example-nexus-gateway.com",
-      clientId: "test-client-id",
-      clientSecret: "test-client-secret",
-    },
     llms: {
-      sagemaker: [
-        SupportedSageMakerModels.FalconLite,
-        SupportedSageMakerModels.Idefics_80b,
-      ],
+      rateLimitPerIP: 100,
     },
     rag: {
       crossEncodingEnabled: true,
@@ -49,16 +39,6 @@ export function getTestConfig(): SystemConfig {
       },
       embeddingsModels: [
         {
-          provider: "sagemaker",
-          name: "intfloat/multilingual-e5-large",
-          dimensions: 1024,
-        },
-        {
-          provider: "sagemaker",
-          name: "sentence-transformers/all-MiniLM-L6-v2",
-          dimensions: 384,
-        },
-        {
           provider: "bedrock",
           name: "amazon.titan-embed-text-v1",
           dimensions: 1536,
@@ -80,19 +60,8 @@ export function getTestConfig(): SystemConfig {
           dimensions: 1024,
           default: true,
         },
-        {
-          provider: "openai",
-          name: "text-embedding-ada-002",
-          dimensions: 1536,
-        },
       ],
-      crossEncoderModels: [
-        {
-          provider: "sagemaker",
-          name: "cross-encoder/ms-marco-MiniLM-L-12-v2",
-          default: true,
-        },
-      ],
+      crossEncoderModels: [],
     },
   };
 }
