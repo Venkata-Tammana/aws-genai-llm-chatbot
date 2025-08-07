@@ -23,7 +23,7 @@ export interface ConfigDialogProps {
 }
 
 interface ChatConfigDialogData {
-  streaming: boolean;
+  // streaming: boolean;
   showMetadata: boolean;
   maxTokens: number;
   temperature: number;
@@ -38,7 +38,10 @@ export default function ConfigDialog(props: ConfigDialogProps) {
   const { data, onChange, errors, validate } = useForm<ChatConfigDialogData>({
     initialValue: () => {
       const retValue = {
-        streaming: props.configuration.streaming,
+  // streaming: props.configuration.streaming,
+  streaming: true, // preset to true
+  // streaming: props.configuration.streaming,
+  // streaming: props.configuration.streaming,
         showMetadata: props.configuration.showMetadata,
         maxTokens: props.configuration.maxTokens,
         temperature: props.configuration.temperature,
@@ -109,6 +112,8 @@ export default function ConfigDialog(props: ConfigDialogProps) {
       <Form>
         <SpaceBetween size="m">
           <FormField label="Session Id">{props.sessionId}</FormField>
+          {/* <FormField label="Streaming" errorText={errors.streaming}> */}
+          {/*
           <FormField label="Streaming" errorText={errors.streaming}>
             <Toggle
               checked={data.streaming}
@@ -119,6 +124,7 @@ export default function ConfigDialog(props: ConfigDialogProps) {
               Enabled (if supported by the model)
             </Toggle>
           </FormField>
+          */}
           <FormField label="Metadata" errorText={errors.showMetadata}>
             <Toggle
               checked={data.showMetadata}
