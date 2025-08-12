@@ -1,4 +1,17 @@
-export type ModelProvider = "bedrock";
+import * as sagemaker from "aws-cdk-lib/aws-sagemaker";
+
+export type ModelProvider = "sagemaker" | "bedrock" | "openai" | "nexus";
+
+export enum SupportedSageMakerModels {
+  FalconLite = "FalconLite [ml.g5.12xlarge]",
+  Idefics_9b = "Idefics_9b (Multimodal) [ml.g5.12xlarge]",
+  Idefics_80b = "Idefics_80b (Multimodal) [ml.g5.48xlarge]",
+  Llama2_13b_Chat = "Llama2_13b_Chat [ml.g5.12xlarge]",
+  Mistral7b_Instruct = "Mistral7b_Instruct 0.1 [ml.g5.2xlarge]",
+  Mistral7b_Instruct2 = "Mistral7b_Instruct 0.2 [ml.g5.2xlarge]",
+  Mistral7b_Instruct3 = "Mistral7b_Instruct 0.3 [ml.g5.2xlarge]",
+  Mixtral_8x7b_Instruct = "Mixtral_8x7B_Instruct 0.1 [ml.g5.48xlarge]",
+}
 
 export enum SupportedRegion {
   AF_SOUTH_1 = "af-south-1",
@@ -108,11 +121,33 @@ export interface SystemConfig {
       version: string;
     };
   };
+  nexus?: {
+    enabled?: boolean;
+    gatewayUrl?: string;
+    tokenUrl?: string;
+    clientId?: string;
+    clientSecret?: string;
+  };
   llms: {
     rateLimitPerIP?: number;
+    sagemaker: SupportedSageMakerModels[];
+    huggingfaceApiSecretArn?: string;
+    sagemakerSchedule?: {
+      enabled?: boolean;
+      timezonePicker?: string;
+      enableCronFormat?: boolean;
+      sagemakerCronStartSchedule?: string;
+      sagemakerCronStopSchedule?: string;
+      daysForSchedule?: string;
+      scheduleStartTime?: string;
+      scheduleStopTime?: string;
+      enableScheduleEndDate?: boolean;
+      startScheduleEndDate?: string;
+    };
   };
   rag: {
     enabled: boolean;
+    deployDefaultSagemakerModels?: boolean;
     engines: {
       aurora: {
         enabled: boolean;
@@ -145,4 +180,20 @@ export interface SystemConfig {
     crossEncodingEnabled: boolean;
     crossEncoderModels: ModelConfig[];
   };
+}
+
+export interface SageMakerLLMEndpoint {
+  name: string;
+  endpoint: sagemaker.CfnEndpoint;
+}
+
+export interface SageMakerModelEndpoint {
+  name: string;
+  endpoint: sagemaker.CfnEndpoint;
+  responseStreamingSupported: boolean;
+  inputModalities: Modality[];
+  outputModalities: Modality[];
+  interface: ModelInterface;
+  ragSupported: boolean;
+  bedrockGuardrails?: boolean;
 }

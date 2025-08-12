@@ -385,15 +385,6 @@ type Application @aws_cognito_user_pools {
   updateTime: AWSDateTime
 }
 
-input EnhancePromptInput {
-  basePrompt: String!
-  model: String!
-}
-
-type EnhancePromptResult {
-  enhancedPrompt: String!
-}
-
 type Mutation {
   createKendraWorkspace(input: CreateWorkspaceKendraInput!): Workspace!
     @aws_cognito_user_pools(cognito_groups: ["admin", "workspace_manager"])
@@ -429,7 +420,6 @@ type Mutation {
   updateApplication(input: ManageApplicationInput!): Application! 
   @aws_cognito_user_pools(cognito_groups: ["admin"])
   deleteApplication(id: String!): Boolean @aws_cognito_user_pools(cognito_groups: ["admin"])
-  enhancePrompt(input: EnhancePromptInput!): EnhancePromptResult @aws_cognito_user_pools(cognito_groups: ["admin"])
 }
 
 type Query {

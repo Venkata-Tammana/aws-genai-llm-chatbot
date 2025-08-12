@@ -6,7 +6,15 @@
     "enabled": false,
     "region": "us-east-1"
   },
+  "nexus": {
+    "enabled": false,
+    "gatewayUrl": "",
+    "tokenUrl": "",
+    "clientId": "",
+    "clientSecret": ""
+  },
   "llms": {
+    "sagemaker": [],
     "rateLimitPerIP": 100
   },
   "rag": {

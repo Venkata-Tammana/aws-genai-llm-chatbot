@@ -9,6 +9,7 @@ import {
   ModelConfig,
   SupportedBedrockRegion,
   SupportedRegion,
+  SupportedSageMakerModels,
   SystemConfig,
 } from "../lib/shared/types";
 import { LIB_VERSION } from "./version";
@@ -83,6 +84,18 @@ const secretManagerArnRegExp = RegExp(
 
 const embeddingModels: ModelConfig[] = [
   {
+    provider: "sagemaker",
+    name: "intfloat/multilingual-e5-large",
+    dimensions: 1024,
+    default: false,
+  },
+  {
+    provider: "sagemaker",
+    name: "sentence-transformers/all-MiniLM-L6-v2",
+    dimensions: 384,
+    default: false,
+  },
+  {
     provider: "bedrock",
     name: "amazon.titan-embed-text-v1",
     dimensions: 1536,
@@ -105,6 +118,12 @@ const embeddingModels: ModelConfig[] = [
     provider: "bedrock",
     name: "cohere.embed-multilingual-v3",
     dimensions: 1024,
+    default: false,
+  },
+  {
+    provider: "openai",
+    name: "text-embedding-ada-002",
+    dimensions: 1536,
     default: false,
   },
 ];
