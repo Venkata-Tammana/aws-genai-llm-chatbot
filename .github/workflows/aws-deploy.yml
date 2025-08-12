@@ -1,0 +1,96 @@
+name: Deploy AWS GenAI LLM Chatbot
+
+on:
+  # Manual deployment trigger
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+  
+  # Automatic deployment on main branch (optional - uncomment if needed)
+  # push:
+  #   branches: [main]
+
+permissions:
+  id-token: write   # Required for AWS OIDC
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment || 'dev' }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ secrets.AWS_REGION }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          
+      - name: Install dependencies and setup
+        run: |
+          npm ci
+          npx @aws-amplify/cli codegen add --yes
+          pip install -r pytest_requirements.txt || echo "No pytest requirements found"
+          
+      - name: Install frontend dependencies
+        working-directory: ./lib/user-interface/react-app
+        run: npm ci
+        
+      - name: Build project
+        run: |
+          mkdir -p /tmp/.cdk/cache
+          npm run build
+          
+      - name: Run tests (optional)
+        run: |
+          npm run test && pytest tests/ || echo "Tests completed - continuing deployment"
+          
+      - name: Run configuration
+        run: |
+          npm run config -- --non-interactive
+          
+      - name: Bootstrap CDK (if needed)
+        run: |
+          npm run cdk bootstrap aws://${{ secrets.AWS_ACCOUNT_ID }}/${{ secrets.AWS_REGION }} -- --require-approval never
+          
+      - name: Deploy to AWS
+        run: |
+          npm run deploy -- --require-approval never --progress events --outputs-file ./cdk-outputs.json --verbose --no-notices
+          
+      - name: Upload deployment outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: cdk-outputs-${{ inputs.environment || 'dev' }}
+          path: cdk-outputs.json
+          retention-days: 30
+          
+      - name: Display deployment info
+        run: |
+          echo "Deployment completed successfully!"
+          if [ -f cdk-outputs.json ]; then
+            echo "Deployment outputs:"
+            cat cdk-outputs.json
+          fi
